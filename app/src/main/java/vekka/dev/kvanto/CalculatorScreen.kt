@@ -15,6 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.LightMode
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -145,7 +149,11 @@ fun CalculatorScreen(
                     ) { if (isDarkTheme) onToggleTheme() },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "☀️", fontSize = 18.sp)
+                Icon(
+                    imageVector = Icons.Rounded.LightMode,
+                    contentDescription = "Tema claro",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
             }
             Box(
                 modifier = Modifier
@@ -161,7 +169,11 @@ fun CalculatorScreen(
                     ) { if (!isDarkTheme) onToggleTheme() },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "🌙", fontSize = 18.sp)
+                Icon(
+                    imageVector = Icons.Rounded.DarkMode,
+                    contentDescription = "Tema oscuro",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
 
