@@ -129,6 +129,17 @@ fun CalculatorScreen() {
         verticalArrangement = Arrangement.Bottom
     ) {
         // Pantalla
+// Operacion en curso
+        Text(
+            text = if (operator.isNotEmpty()) "$firstNumber $operator" else "",
+            fontSize = 24.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
+            textAlign = TextAlign.End
+        )
+
+// Numero principal
         Text(
             text = displayValue,
             fontSize = 64.sp,

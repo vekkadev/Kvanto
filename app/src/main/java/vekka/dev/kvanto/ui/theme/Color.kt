@@ -2,10 +2,11 @@ package vekka.dev.kvanto.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Morado pastel - colores principales
+val Purple80 = Color(0xFFCDB4DB)
+val PurpleGrey80 = Color(0xFFB8A9C9)
+val Pink80 = Color(0xFFE0D4F0)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val Purple40 = Color(0xFF7B5EA7)
+val PurpleGrey40 = Color(0xFF6B5B8A)
+val Pink40 = Color(0xFF9C7BC0)
