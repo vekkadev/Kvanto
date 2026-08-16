@@ -7,11 +7,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import vekka.dev.kvanto.ui.theme.KvantoTheme
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,24 +49,21 @@ class MainActivity : ComponentActivity() {
 fun CalculatorButton(
     label: String,
     isOperator: Boolean = false,
-    isSpecial: Boolean = false,
     onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
-        shape = CircleShape,
+        shape = RoundedCornerShape(24.dp),
         modifier = Modifier.size(80.dp),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 6.dp,
+            pressedElevation = 2.dp
+        ),
         colors = ButtonDefaults.buttonColors(
-            containerColor = when {
-                isOperator -> MaterialTheme.colorScheme.primary
-                isSpecial -> MaterialTheme.colorScheme.secondary
-                else -> MaterialTheme.colorScheme.surfaceVariant
-            },
-            contentColor = when {
-                isOperator -> MaterialTheme.colorScheme.onPrimary
-                isSpecial -> MaterialTheme.colorScheme.onSecondary
-                else -> MaterialTheme.colorScheme.onSurface
-            }
+            containerColor = if (isOperator) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.surface,
+            contentColor = if (isOperator) MaterialTheme.colorScheme.onPrimary
+            else MaterialTheme.colorScheme.onSurface
         )
     ) {
         Text(text = label, fontSize = 20.sp)
@@ -143,9 +145,9 @@ fun CalculatorScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Bottom
-    ) {
+            .padding(16.dp)
+            .windowInsetsPadding(WindowInsets.navigationBars),    ) {
+
         // Pantalla
 // Operacion en curso
         Text(
