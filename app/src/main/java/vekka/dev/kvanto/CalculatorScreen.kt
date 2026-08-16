@@ -34,63 +34,81 @@ fun CalculatorScreen(
     isDarkTheme: Boolean = false,
     onToggleTheme: () -> Unit = {}
 ) {
-    var displayValue by remember { mutableStateOf("0") }
-    var firstNumber by remember { mutableStateOf("") }
-    var operator by remember { mutableStateOf("") }
-    var newNumber by remember { mutableStateOf(true) }
+    var expression by remember { mutableStateOf("") }
+    var result by remember { mutableStateOf("") }
+    var justCalculated by remember { mutableStateOf(false) }
+
+    fun updateResult() {
+        val hasOperator = expression.any { it in listOf('+', '-', '×', '÷') }
+        if (!hasOperator) {
+            result = ""
+            return
+        }
+        try {
+            val calculated = evaluate(expression)
+            result = if (calculated % 1.0 == 0.0) {
+                calculated.toLong().toString()
+            } else {
+                calculated.toString()
+            }
+        } catch (e: Exception) {
+            result = ""
+        }
+    }
 
     fun onButtonClick(label: String) {
         when (label) {
             "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" -> {
-                if (newNumber) {
-                    displayValue = label
-                    newNumber = false
+                if (expression.isEmpty() || justCalculated) {
+                    expression = label
+                    justCalculated = false
                 } else {
-                    displayValue += label
+                    expression += label
                 }
+                updateResult()
             }
             "." -> {
-                if (!displayValue.contains(".")) {
-                    displayValue += "."
+                val lastNumber = expression.split("+", "-", "×", "÷").last()
+                if (!lastNumber.contains(".")) {
+                    expression += "."
                 }
             }
             "⌫" -> {
-                displayValue = if (displayValue.length > 1) {
-                    displayValue.dropLast(1)
+                expression = if (expression.length > 1) {
+                    expression.dropLast(1)
                 } else {
-                    "0"
+                    ""
                 }
+                justCalculated = false
+                updateResult()
             }
             "AC" -> {
-                displayValue = "0"
-                firstNumber = ""
-                operator = ""
-                newNumber = true
+                expression = ""
+                result = ""
+                justCalculated = false
             }
             "+", "-", "×", "÷" -> {
-                firstNumber = displayValue
-                operator = label
-                newNumber = true
+                if (justCalculated) justCalculated = false
+                if (expression.isNotEmpty() && !expression.last().isDigit()) {
+                    expression = expression.dropLast(1)
+                }
+                expression += label
+                result = ""
             }
             "=" -> {
-                if (operator.isNotEmpty() && firstNumber.isNotEmpty()) {
-                    val a = firstNumber.toDouble()
-                    val b = displayValue.toDouble()
-                    val result = when (operator) {
-                        "+" -> a + b
-                        "-" -> a - b
-                        "×" -> a * b
-                        "÷" -> if (b != 0.0) a / b else Double.NaN
-                        else -> b
-                    }
-                    displayValue = if (result % 1.0 == 0.0) {
-                        result.toLong().toString()
+                try {
+                    val calculated = evaluate(expression)
+                    val resultStr = if (calculated % 1.0 == 0.0) {
+                        calculated.toLong().toString()
                     } else {
-                        result.toString()
+                        calculated.toString()
                     }
-                    firstNumber = ""
-                    operator = ""
-                    newNumber = true
+                    expression = resultStr
+                    result = ""
+                    justCalculated = true
+                } catch (e: Exception) {
+                    expression = "Error"
+                    justCalculated = true
                 }
             }
         }
@@ -156,70 +174,58 @@ fun CalculatorScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = if (operator.isNotEmpty()) "$firstNumber $operator" else "",
-                fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp),
-                textAlign = TextAlign.End
-            )
-            Text(
-                text = displayValue,
+                text = expression,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,
                 fontSize = when {
-                    displayValue.length > 12 -> 32.sp
-                    displayValue.length > 9 -> 42.sp
-                    displayValue.length > 6 -> 52.sp
+                    expression.length > 12 -> 32.sp
+                    expression.length > 9 -> 42.sp
+                    expression.length > 6 -> 52.sp
                     else -> 64.sp
                 },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
+                textAlign = TextAlign.End,
+                softWrap = false
+            )
+            Text(
+                text = result,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                maxLines = 1,
+                fontSize = 36.sp,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 textAlign = TextAlign.End,
                 softWrap = false
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
-            ) {
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
                 CalculatorButton("AC") { onButtonClick("AC") }
                 CalculatorButton("+/-") { onButtonClick("+/-") }
                 CalculatorButton("%") { onButtonClick("%") }
                 CalculatorButton("÷", isOperator = true) { onButtonClick("÷") }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
                 CalculatorButton("7") { onButtonClick("7") }
                 CalculatorButton("8") { onButtonClick("8") }
                 CalculatorButton("9") { onButtonClick("9") }
                 CalculatorButton("×", isOperator = true) { onButtonClick("×") }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
                 CalculatorButton("4") { onButtonClick("4") }
                 CalculatorButton("5") { onButtonClick("5") }
                 CalculatorButton("6") { onButtonClick("6") }
                 CalculatorButton("-", isOperator = true) { onButtonClick("-") }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
                 CalculatorButton("1") { onButtonClick("1") }
                 CalculatorButton("2") { onButtonClick("2") }
                 CalculatorButton("3") { onButtonClick("3") }
                 CalculatorButton("+", isOperator = true) { onButtonClick("+") }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
                 CalculatorButton("0") { onButtonClick("0") }
                 CalculatorButton(".") { onButtonClick(".") }
                 CalculatorButton("⌫") { onButtonClick("⌫") }
@@ -227,4 +233,35 @@ fun CalculatorScreen(
             }
         }
     }
+}
+
+fun evaluate(expression: String): Double {
+    val tokens = mutableListOf<String>()
+    var current = ""
+    for (char in expression) {
+        if (char in listOf('+', '×', '÷') || (char == '-' && current.isNotEmpty())) {
+            if (current.isNotEmpty()) tokens.add(current)
+            tokens.add(char.toString())
+            current = ""
+        } else {
+            current += char
+        }
+    }
+    if (current.isNotEmpty()) tokens.add(current)
+
+    var result = tokens[0].toDouble()
+    var i = 1
+    while (i < tokens.size - 1) {
+        val op = tokens[i]
+        val next = tokens[i + 1].toDouble()
+        result = when (op) {
+            "+" -> result + next
+            "-" -> result - next
+            "×" -> result * next
+            "÷" -> if (next != 0.0) result / next else Double.NaN
+            else -> result
+        }
+        i += 2
+    }
+    return result
 }
