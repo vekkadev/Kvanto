@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import vekka.dev.kvanto.ui.theme.KvantoTheme
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
@@ -40,11 +41,28 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun CalculatorButton(label: String, onClick: () -> Unit) {
+fun CalculatorButton(
+    label: String,
+    isOperator: Boolean = false,
+    isSpecial: Boolean = false,
+    onClick: () -> Unit
+) {
     Button(
         onClick = onClick,
         shape = CircleShape,
-        modifier = Modifier.size(80.dp)
+        modifier = Modifier.size(80.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = when {
+                isOperator -> MaterialTheme.colorScheme.primary
+                isSpecial -> MaterialTheme.colorScheme.secondary
+                else -> MaterialTheme.colorScheme.surfaceVariant
+            },
+            contentColor = when {
+                isOperator -> MaterialTheme.colorScheme.onPrimary
+                isSpecial -> MaterialTheme.colorScheme.onSecondary
+                else -> MaterialTheme.colorScheme.onSurface
+            }
+        )
     ) {
         Text(text = label, fontSize = 20.sp)
     }
@@ -149,7 +167,7 @@ fun CalculatorScreen() {
             textAlign = TextAlign.End
         )
 
-        // Fila 1
+// Fila 1
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -157,7 +175,7 @@ fun CalculatorScreen() {
             CalculatorButton("AC") { onButtonClick("AC") }
             CalculatorButton("+/-") { onButtonClick("+/-") }
             CalculatorButton("%") { onButtonClick("%") }
-            CalculatorButton("÷") { onButtonClick("÷") }
+            CalculatorButton("÷", isOperator = true) { onButtonClick("÷") }
         }
 
         // Fila 2
@@ -168,7 +186,7 @@ fun CalculatorScreen() {
             CalculatorButton("7") { onButtonClick("7") }
             CalculatorButton("8") { onButtonClick("8") }
             CalculatorButton("9") { onButtonClick("9") }
-            CalculatorButton("×") { onButtonClick("×") }
+            CalculatorButton("×", isOperator = true) { onButtonClick("×") }
         }
 
         // Fila 3
@@ -179,7 +197,7 @@ fun CalculatorScreen() {
             CalculatorButton("4") { onButtonClick("4") }
             CalculatorButton("5") { onButtonClick("5") }
             CalculatorButton("6") { onButtonClick("6") }
-            CalculatorButton("-") { onButtonClick("-") }
+            CalculatorButton("-", isOperator = true) { onButtonClick("-") }
         }
 
         // Fila 4
@@ -190,7 +208,7 @@ fun CalculatorScreen() {
             CalculatorButton("1") { onButtonClick("1") }
             CalculatorButton("2") { onButtonClick("2") }
             CalculatorButton("3") { onButtonClick("3") }
-            CalculatorButton("+") { onButtonClick("+") }
+            CalculatorButton("+", isOperator = true) { onButtonClick("+") }
         }
 
         // Fila 5
@@ -201,7 +219,7 @@ fun CalculatorScreen() {
             CalculatorButton("0") { onButtonClick("0") }
             CalculatorButton(".") { onButtonClick(".") }
             CalculatorButton("⌫") { onButtonClick("⌫") }
-            CalculatorButton("=") { onButtonClick("=") }
+            CalculatorButton("=", isOperator = true) { onButtonClick("=") }
         }
     }
 }
