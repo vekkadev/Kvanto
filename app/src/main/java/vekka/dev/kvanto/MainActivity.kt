@@ -146,7 +146,10 @@ fun CalculatorScreen() {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .windowInsetsPadding(WindowInsets.navigationBars),    ) {
+            .windowInsetsPadding(WindowInsets.navigationBars),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Bottom),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
         // Pantalla
 // Operacion en curso
