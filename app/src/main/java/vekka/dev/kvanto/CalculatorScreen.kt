@@ -2,6 +2,7 @@ package vekka.dev.kvanto
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -121,7 +121,10 @@ fun CalculatorScreen(
                         shape = RoundedCornerShape(50.dp)
                     )
                     .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .clickable { if (isDarkTheme) onToggleTheme() },
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { if (isDarkTheme) onToggleTheme() },
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = "☀️", fontSize = 18.sp)
@@ -134,7 +137,10 @@ fun CalculatorScreen(
                         shape = RoundedCornerShape(50.dp)
                     )
                     .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .clickable { if (!isDarkTheme) onToggleTheme() },
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { if (!isDarkTheme) onToggleTheme() },
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = "🌙", fontSize = 18.sp)
@@ -151,8 +157,8 @@ fun CalculatorScreen(
         ) {
             Text(
                 text = if (operator.isNotEmpty()) "$firstNumber $operator" else "",
-                fontSize = 24.sp,
-                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 4.dp),
@@ -174,31 +180,46 @@ fun CalculatorScreen(
                 textAlign = TextAlign.End,
                 softWrap = false
             )
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
                 CalculatorButton("AC") { onButtonClick("AC") }
                 CalculatorButton("+/-") { onButtonClick("+/-") }
                 CalculatorButton("%") { onButtonClick("%") }
                 CalculatorButton("÷", isOperator = true) { onButtonClick("÷") }
             }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
                 CalculatorButton("7") { onButtonClick("7") }
                 CalculatorButton("8") { onButtonClick("8") }
                 CalculatorButton("9") { onButtonClick("9") }
                 CalculatorButton("×", isOperator = true) { onButtonClick("×") }
             }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
                 CalculatorButton("4") { onButtonClick("4") }
                 CalculatorButton("5") { onButtonClick("5") }
                 CalculatorButton("6") { onButtonClick("6") }
                 CalculatorButton("-", isOperator = true) { onButtonClick("-") }
             }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
                 CalculatorButton("1") { onButtonClick("1") }
                 CalculatorButton("2") { onButtonClick("2") }
                 CalculatorButton("3") { onButtonClick("3") }
                 CalculatorButton("+", isOperator = true) { onButtonClick("+") }
             }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
                 CalculatorButton("0") { onButtonClick("0") }
                 CalculatorButton(".") { onButtonClick(".") }
                 CalculatorButton("⌫") { onButtonClick("⌫") }
