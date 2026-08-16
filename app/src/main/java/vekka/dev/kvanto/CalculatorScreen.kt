@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -159,12 +160,19 @@ fun CalculatorScreen(
             )
             Text(
                 text = displayValue,
-                fontSize = 64.sp,
                 color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                fontSize = when {
+                    displayValue.length > 12 -> 32.sp
+                    displayValue.length > 9 -> 42.sp
+                    displayValue.length > 6 -> 52.sp
+                    else -> 64.sp
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                textAlign = TextAlign.End
+                textAlign = TextAlign.End,
+                softWrap = false
             )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 CalculatorButton("AC") { onButtonClick("AC") }
