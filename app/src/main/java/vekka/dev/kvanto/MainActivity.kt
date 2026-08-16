@@ -2,9 +2,11 @@ package vekka.dev.kvanto
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,12 +17,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,9 +41,14 @@ import vekka.dev.kvanto.ui.theme.KvantoTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             var isDarkTheme by remember { mutableStateOf(false) }
+            enableEdgeToEdge(
+                statusBarStyle = if (isDarkTheme)
+                    SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                else
+                    SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+            )
             KvantoTheme(darkTheme = isDarkTheme) {
                 CalculatorScreen(
                     isDarkTheme = isDarkTheme,
@@ -150,18 +156,44 @@ fun CalculatorScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-
-        // Boton de tema arriba a la derecha
-        IconButton(
-            onClick = onToggleTheme,
+        Row(
             modifier = Modifier
-                .align(Alignment.TopEnd)
+                .align(Alignment.TopStart)
+                .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(16.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(50.dp)
+                )
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = if (isDarkTheme) "☀️" else "🌙",
-                fontSize = 24.sp
-            )
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = if (!isDarkTheme) MaterialTheme.colorScheme.primary
+                        else Color.Transparent,
+                        shape = RoundedCornerShape(50.dp)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clickable { if (isDarkTheme) onToggleTheme() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "☀️", fontSize = 18.sp)
+            }
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = if (isDarkTheme) MaterialTheme.colorScheme.primary
+                        else Color.Transparent,
+                        shape = RoundedCornerShape(50.dp)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clickable { if (!isDarkTheme) onToggleTheme() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "🌙", fontSize = 18.sp)
+            }
         }
 
         Column(
@@ -181,7 +213,6 @@ fun CalculatorScreen(
                     .padding(bottom = 4.dp),
                 textAlign = TextAlign.End
             )
-
             Text(
                 text = displayValue,
                 fontSize = 64.sp,
@@ -191,7 +222,6 @@ fun CalculatorScreen(
                     .padding(bottom = 16.dp),
                 textAlign = TextAlign.End
             )
-
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 CalculatorButton("AC") { onButtonClick("AC") }
                 CalculatorButton("+/-") { onButtonClick("+/-") }
