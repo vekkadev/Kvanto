@@ -16,9 +16,12 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +44,8 @@ fun CalculatorScreen(
     var expression by remember { mutableStateOf("") }
     var result by remember { mutableStateOf("") }
     var justCalculated by remember { mutableStateOf(false) }
+    var history by remember { mutableStateOf(listOf<HistoryItem>()) }
+    var showHistory by remember { mutableStateOf(false) }
 
     fun updateResult() {
         val hasOperator = expression.any { it in listOf('+', '-', '×', '÷') }
@@ -107,6 +112,7 @@ fun CalculatorScreen(
                     } else {
                         calculated.toString()
                     }
+                    history = listOf(HistoryItem(expression, resultStr)) + history
                     expression = resultStr
                     result = ""
                     justCalculated = true
@@ -123,6 +129,7 @@ fun CalculatorScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+        // Toggle de tema
         Row(
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -177,72 +184,138 @@ fun CalculatorScreen(
             }
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .windowInsetsPadding(WindowInsets.navigationBars),
-            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Bottom),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = expression,
-                color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 1,
-                fontSize = when {
-                    expression.length > 12 -> 32.sp
-                    expression.length > 9 -> 42.sp
-                    expression.length > 6 -> 52.sp
-                    else -> 64.sp
-                },
+        // Calculadora principal
+        if (!showHistory) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp),
-                textAlign = TextAlign.End,
-                softWrap = false
-            )
-            Text(
-                text = result,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                maxLines = 1,
-                fontSize = 36.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                textAlign = TextAlign.End,
-                softWrap = false
-            )
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .windowInsetsPadding(WindowInsets.navigationBars),
+                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Bottom),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = expression,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 1,
+                    fontSize = when {
+                        expression.length > 12 -> 32.sp
+                        expression.length > 9 -> 42.sp
+                        expression.length > 6 -> 52.sp
+                        else -> 64.sp
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp),
+                    textAlign = TextAlign.End,
+                    softWrap = false
+                )
+                Text(
+                    text = result,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                    maxLines = 1,
+                    fontSize = 36.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    textAlign = TextAlign.End,
+                    softWrap = false
+                )
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
+                    CalculatorButton("AC") { onButtonClick("AC") }
+                    CalculatorButton("+/-") { onButtonClick("+/-") }
+                    CalculatorButton("%") { onButtonClick("%") }
+                    CalculatorButton("÷", isOperator = true) { onButtonClick("÷") }
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
+                    CalculatorButton("7") { onButtonClick("7") }
+                    CalculatorButton("8") { onButtonClick("8") }
+                    CalculatorButton("9") { onButtonClick("9") }
+                    CalculatorButton("×", isOperator = true) { onButtonClick("×") }
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
+                    CalculatorButton("4") { onButtonClick("4") }
+                    CalculatorButton("5") { onButtonClick("5") }
+                    CalculatorButton("6") { onButtonClick("6") }
+                    CalculatorButton("-", isOperator = true) { onButtonClick("-") }
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
+                    CalculatorButton("1") { onButtonClick("1") }
+                    CalculatorButton("2") { onButtonClick("2") }
+                    CalculatorButton("3") { onButtonClick("3") }
+                    CalculatorButton("+", isOperator = true) { onButtonClick("+") }
+                }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
+                    CalculatorButton("0") { onButtonClick("0") }
+                    CalculatorButton(".") { onButtonClick(".") }
+                    CalculatorButton("⌫") { onButtonClick("⌫") }
+                    CalculatorButton("=", isOperator = true) { onButtonClick("=") }
+                }
+            }
+        }
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                CalculatorButton("AC") { onButtonClick("AC") }
-                CalculatorButton("+/-") { onButtonClick("+/-") }
-                CalculatorButton("%") { onButtonClick("%") }
-                CalculatorButton("÷", isOperator = true) { onButtonClick("÷") }
+        // Panel de historial
+        if (showHistory) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .padding(top = 72.dp)
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text(
+                    text = "Historial",
+                    fontSize = 24.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                if (history.isEmpty()) {
+                    Text(
+                        text = "No hay operaciones todavía",
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                        fontSize = 16.sp
+                    )
+                } else {
+                    history.forEach { item ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = item.expression,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                                fontSize = 16.sp,
+                                textAlign = TextAlign.End,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Text(
+                                text = "= ${item.result}",
+                                color = MaterialTheme.colorScheme.onBackground,
+                                fontSize = 24.sp,
+                                textAlign = TextAlign.End,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
             }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                CalculatorButton("7") { onButtonClick("7") }
-                CalculatorButton("8") { onButtonClick("8") }
-                CalculatorButton("9") { onButtonClick("9") }
-                CalculatorButton("×", isOperator = true) { onButtonClick("×") }
-            }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                CalculatorButton("4") { onButtonClick("4") }
-                CalculatorButton("5") { onButtonClick("5") }
-                CalculatorButton("6") { onButtonClick("6") }
-                CalculatorButton("-", isOperator = true) { onButtonClick("-") }
-            }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                CalculatorButton("1") { onButtonClick("1") }
-                CalculatorButton("2") { onButtonClick("2") }
-                CalculatorButton("3") { onButtonClick("3") }
-                CalculatorButton("+", isOperator = true) { onButtonClick("+") }
-            }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                CalculatorButton("0") { onButtonClick("0") }
-                CalculatorButton(".") { onButtonClick(".") }
-                CalculatorButton("⌫") { onButtonClick("⌫") }
-                CalculatorButton("=", isOperator = true) { onButtonClick("=") }
-            }
+        }
+
+        // Boton de historial arriba a la derecha - siempre visible
+        IconButton(
+            onClick = { showHistory = !showHistory },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = if (showHistory) Icons.Rounded.Close else Icons.Rounded.History,
+                contentDescription = "Historial",
+                tint = MaterialTheme.colorScheme.onBackground
+            )
         }
     }
 }
