@@ -20,7 +20,7 @@ fun CalculatorButton(
     Button(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        modifier = Modifier.size(80.dp),
+        modifier = Modifier.size(88.dp),
         elevation = ButtonDefaults.buttonElevation(
             defaultElevation = 6.dp,
             pressedElevation = 2.dp
