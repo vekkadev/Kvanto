@@ -11,14 +11,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import vekka.dev.kvanto.ui.theme.CalcGreen
+import vekka.dev.kvanto.ui.theme.CalcRed
 
 @Composable
 fun CalculatorButton(
     label: String,
     isOperator: Boolean = false,
     size: Dp = 88.dp,
+    containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface,
     onClick: () -> Unit
 ) {
+    val contentColor = when (label) {
+        "AC", "+/-", "%" -> CalcGreen
+        "÷", "×", "-", "+", "=", "⌫" -> CalcRed
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "." -> MaterialTheme.colorScheme.onSurface
+        else -> MaterialTheme.colorScheme.onSurface
+    }
+
     Button(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
@@ -28,10 +38,8 @@ fun CalculatorButton(
             pressedElevation = 2.dp
         ),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isOperator) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.surface,
-            contentColor = if (isOperator) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onSurface
+            containerColor = containerColor,
+            contentColor = contentColor
         )
     ) {
         Text(text = label, fontSize = if (size < 80.dp) 16.sp else 20.sp)

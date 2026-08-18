@@ -41,17 +41,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+import vekka.dev.kvanto.ui.theme.CalcGreen
+import vekka.dev.kvanto.ui.theme.CalcRed
 
 @Composable
 fun LandscapeButton(
     label: String,
     isOperator: Boolean = false,
     modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     onClick: () -> Unit
 ) {
+    val contentColor = when (label) {
+        "AC", "+/-", "%" -> CalcGreen
+        "÷", "×", "-", "+", "=", "⌫" -> CalcRed
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "." -> MaterialTheme.colorScheme.onSurface
+        else -> MaterialTheme.colorScheme.onSurface
+    }
+
     Button(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
@@ -61,10 +76,8 @@ fun LandscapeButton(
             pressedElevation = 1.dp
         ),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isOperator) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.surface,
-            contentColor = if (isOperator) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onSurface
+            containerColor = containerColor,
+            contentColor = contentColor
         )
     ) {
         Text(text = label, fontSize = 18.sp)
@@ -88,7 +101,24 @@ fun CalculatorScreen(
     var showHistory by rememberSaveable { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val keyboardBg = if (isDarkTheme) Color(0xFF333538) else Color(0xFFD2D5D8)
+    val keyboardBg = if (isDarkTheme) Color(0xFF3E4044) else Color(0xFFDFE1E5)
+    val buttonColor = if (isDarkTheme) Color(0xFF2D2E32) else Color(0xFFF1F3F4)
+    val toggleActiveColor = if (isDarkTheme) Color(0xFF4A4D51) else Color(0xFFE0E0E0)
+    val operatorColor = if (isDarkTheme) CalcRed else CalcGreen
+
+    val annotatedExpression = remember(expression, isDarkTheme) {
+        buildAnnotatedString {
+            expression.forEach { char ->
+                if (char in "+-×÷") {
+                    withStyle(style = SpanStyle(color = operatorColor)) {
+                        append(char)
+                    }
+                } else {
+                    append(char)
+                }
+            }
+        }
+    }
 
     fun updateResult() {
         var cleanExpression = expression
@@ -154,6 +184,7 @@ fun CalculatorScreen(
                 updateResult()
             }
             "=" -> {
+                if (expression.isEmpty()) return
                 try {
                     val calculated = evaluate(expression)
                     val resultStr = if (calculated % 1.0 == 0.0) {
@@ -194,7 +225,7 @@ fun CalculatorScreen(
             Box(
                 modifier = Modifier
                     .background(
-                        color = if (!isDarkTheme) MaterialTheme.colorScheme.primary
+                        color = if (!isDarkTheme) toggleActiveColor
                         else Color.Transparent,
                         shape = RoundedCornerShape(50.dp)
                     )
@@ -208,13 +239,13 @@ fun CalculatorScreen(
                 Icon(
                     imageVector = Icons.Rounded.LightMode,
                     contentDescription = "Tema claro",
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = if (!isDarkTheme) CalcGreen else MaterialTheme.colorScheme.onSurface
                 )
             }
             Box(
                 modifier = Modifier
                     .background(
-                        color = if (isDarkTheme) MaterialTheme.colorScheme.primary
+                        color = if (isDarkTheme) toggleActiveColor
                         else Color.Transparent,
                         shape = RoundedCornerShape(50.dp)
                     )
@@ -228,7 +259,7 @@ fun CalculatorScreen(
                 Icon(
                     imageVector = Icons.Rounded.DarkMode,
                     contentDescription = "Tema oscuro",
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = if (isDarkTheme) CalcRed else MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -250,7 +281,7 @@ fun CalculatorScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = expression,
+                            text = annotatedExpression,
                             color = MaterialTheme.colorScheme.onBackground,
                             maxLines = 1,
                             fontSize = 32.sp,
@@ -284,44 +315,44 @@ fun CalculatorScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            LandscapeButton("7", modifier = Modifier.weight(1f)) { onButtonClick("7") }
-                            LandscapeButton("8", modifier = Modifier.weight(1f)) { onButtonClick("8") }
-                            LandscapeButton("9", modifier = Modifier.weight(1f)) { onButtonClick("9") }
-                            LandscapeButton("AC", modifier = Modifier.weight(1f)) { onButtonClick("AC") }
-                            LandscapeButton("×", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("×") }
+                            LandscapeButton("7", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("7") }
+                            LandscapeButton("8", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("8") }
+                            LandscapeButton("9", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("9") }
+                            LandscapeButton("AC", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("AC") }
+                            LandscapeButton("×", isOperator = true, modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("×") }
                         }
                         // Fila 2
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            LandscapeButton("4", modifier = Modifier.weight(1f)) { onButtonClick("4") }
-                            LandscapeButton("5", modifier = Modifier.weight(1f)) { onButtonClick("5") }
-                            LandscapeButton("6", modifier = Modifier.weight(1f)) { onButtonClick("6") }
-                            LandscapeButton("+/-", modifier = Modifier.weight(1f)) { onButtonClick("+/-") }
-                            LandscapeButton("-", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("-") }
+                            LandscapeButton("4", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("4") }
+                            LandscapeButton("5", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("5") }
+                            LandscapeButton("6", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("6") }
+                            LandscapeButton("+/-", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("+/-") }
+                            LandscapeButton("-", isOperator = true, modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("-") }
                         }
                         // Fila 3
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            LandscapeButton("1", modifier = Modifier.weight(1f)) { onButtonClick("1") }
-                            LandscapeButton("2", modifier = Modifier.weight(1f)) { onButtonClick("2") }
-                            LandscapeButton("3", modifier = Modifier.weight(1f)) { onButtonClick("3") }
-                            LandscapeButton("%", modifier = Modifier.weight(1f)) { onButtonClick("%") }
-                            LandscapeButton("+", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("+") }
+                            LandscapeButton("1", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("1") }
+                            LandscapeButton("2", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("2") }
+                            LandscapeButton("3", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("3") }
+                            LandscapeButton("%", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("%") }
+                            LandscapeButton("+", isOperator = true, modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("+") }
                         }
                         // Fila 4
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            LandscapeButton("0", modifier = Modifier.weight(1f)) { onButtonClick("0") }
-                            LandscapeButton(".", modifier = Modifier.weight(1f)) { onButtonClick(".") }
-                            LandscapeButton("⌫", modifier = Modifier.weight(1f)) { onButtonClick("⌫") }
-                            LandscapeButton("÷", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("÷") }
-                            LandscapeButton("=", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("=") }
+                            LandscapeButton("0", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("0") }
+                            LandscapeButton(".", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick(".") }
+                            LandscapeButton("⌫", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("⌫") }
+                            LandscapeButton("÷", isOperator = true, modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("÷") }
+                            LandscapeButton("=", isOperator = true, modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("=") }
                         }
                     }
                 }
@@ -341,7 +372,7 @@ fun CalculatorScreen(
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = expression,
+                            text = annotatedExpression,
                             color = MaterialTheme.colorScheme.onBackground,
                             maxLines = 1,
                             fontSize = when {
@@ -382,34 +413,34 @@ fun CalculatorScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                            CalculatorButton("AC") { onButtonClick("AC") }
-                            CalculatorButton("+/-") { onButtonClick("+/-") }
-                            CalculatorButton("%") { onButtonClick("%") }
-                            CalculatorButton("÷", isOperator = true) { onButtonClick("÷") }
+                            CalculatorButton("AC", containerColor = buttonColor) { onButtonClick("AC") }
+                            CalculatorButton("+/-", containerColor = buttonColor) { onButtonClick("+/-") }
+                            CalculatorButton("%", containerColor = buttonColor) { onButtonClick("%") }
+                            CalculatorButton("÷", isOperator = true, containerColor = buttonColor) { onButtonClick("÷") }
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                            CalculatorButton("7") { onButtonClick("7") }
-                            CalculatorButton("8") { onButtonClick("8") }
-                            CalculatorButton("9") { onButtonClick("9") }
-                            CalculatorButton("×", isOperator = true) { onButtonClick("×") }
+                            CalculatorButton("7", containerColor = buttonColor) { onButtonClick("7") }
+                            CalculatorButton("8", containerColor = buttonColor) { onButtonClick("8") }
+                            CalculatorButton("9", containerColor = buttonColor) { onButtonClick("9") }
+                            CalculatorButton("×", isOperator = true, containerColor = buttonColor) { onButtonClick("×") }
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                            CalculatorButton("4") { onButtonClick("4") }
-                            CalculatorButton("5") { onButtonClick("5") }
-                            CalculatorButton("6") { onButtonClick("6") }
-                            CalculatorButton("-", isOperator = true) { onButtonClick("-") }
+                            CalculatorButton("4", containerColor = buttonColor) { onButtonClick("4") }
+                            CalculatorButton("5", containerColor = buttonColor) { onButtonClick("5") }
+                            CalculatorButton("6", containerColor = buttonColor) { onButtonClick("6") }
+                            CalculatorButton("-", isOperator = true, containerColor = buttonColor) { onButtonClick("-") }
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                            CalculatorButton("1") { onButtonClick("1") }
-                            CalculatorButton("2") { onButtonClick("2") }
-                            CalculatorButton("3") { onButtonClick("3") }
-                            CalculatorButton("+", isOperator = true) { onButtonClick("+") }
+                            CalculatorButton("1", containerColor = buttonColor) { onButtonClick("1") }
+                            CalculatorButton("2", containerColor = buttonColor) { onButtonClick("2") }
+                            CalculatorButton("3", containerColor = buttonColor) { onButtonClick("3") }
+                            CalculatorButton("+", isOperator = true, containerColor = buttonColor) { onButtonClick("+") }
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                            CalculatorButton("0") { onButtonClick("0") }
-                            CalculatorButton(".") { onButtonClick(".") }
-                            CalculatorButton("⌫") { onButtonClick("⌫") }
-                            CalculatorButton("=", isOperator = true) { onButtonClick("=") }
+                            CalculatorButton("0", containerColor = buttonColor) { onButtonClick("0") }
+                            CalculatorButton(".", containerColor = buttonColor) { onButtonClick(".") }
+                            CalculatorButton("⌫", containerColor = buttonColor) { onButtonClick("⌫") }
+                            CalculatorButton("=", isOperator = true, containerColor = buttonColor) { onButtonClick("=") }
                         }
                     }
                 }

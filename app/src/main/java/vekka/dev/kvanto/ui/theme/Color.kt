@@ -10,3 +10,7 @@ val Pink80 = Color(0xFFE0D4F0)
 val Purple40 = Color(0xFF7B5EA7)
 val PurpleGrey40 = Color(0xFF6B5B8A)
 val Pink40 = Color(0xFF9C7BC0)
+
+// Nuevos colores para calculadora (Estilo Soft UI)
+val CalcGreen = Color(0xFF26A69A)
+val CalcRed = Color(0xFFEF5350)
