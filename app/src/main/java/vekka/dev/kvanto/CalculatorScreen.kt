@@ -88,15 +88,17 @@ fun CalculatorScreen(
     var showHistory by rememberSaveable { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val keyboardBg = if (isDarkTheme) Color(0xFF333538) else Color(0xFFD2D5D8)
 
     fun updateResult() {
-        val hasOperator = expression.any { it in listOf('+', '-', '×', '÷') }
         var cleanExpression = expression
         if (cleanExpression.isNotEmpty() && !cleanExpression.last().isDigit()) {
             cleanExpression = cleanExpression.dropLast(1)
         }
         
-        if (!hasOperator || cleanExpression.isEmpty()) {
+        val hasActualOperation = cleanExpression.any { it in listOf('+', '-', '×', '÷') }
+        
+        if (!hasActualOperation || cleanExpression.isEmpty()) {
             result = ""
             return
         }
@@ -234,15 +236,11 @@ fun CalculatorScreen(
         // Calculadora principal
         if (!showHistory) {
             if (isLandscape) {
-                // Layout horizontal - igual a Google Calculator
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .windowInsetsPadding(WindowInsets.systemBars)
-                        .padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    // Display Container
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -270,117 +268,149 @@ fun CalculatorScreen(
                             softWrap = false
                         )
                     }
-                    // Fila 1
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = keyboardBg,
+                                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                            )
+                            .padding(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        LandscapeButton("7", modifier = Modifier.weight(1f)) { onButtonClick("7") }
-                        LandscapeButton("8", modifier = Modifier.weight(1f)) { onButtonClick("8") }
-                        LandscapeButton("9", modifier = Modifier.weight(1f)) { onButtonClick("9") }
-                        LandscapeButton("AC", modifier = Modifier.weight(1f)) { onButtonClick("AC") }
-                        LandscapeButton("×", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("×") }
-                    }
-                    // Fila 2
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        LandscapeButton("4", modifier = Modifier.weight(1f)) { onButtonClick("4") }
-                        LandscapeButton("5", modifier = Modifier.weight(1f)) { onButtonClick("5") }
-                        LandscapeButton("6", modifier = Modifier.weight(1f)) { onButtonClick("6") }
-                        LandscapeButton("+/-", modifier = Modifier.weight(1f)) { onButtonClick("+/-") }
-                        LandscapeButton("-", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("-") }
-                    }
-                    // Fila 3
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        LandscapeButton("1", modifier = Modifier.weight(1f)) { onButtonClick("1") }
-                        LandscapeButton("2", modifier = Modifier.weight(1f)) { onButtonClick("2") }
-                        LandscapeButton("3", modifier = Modifier.weight(1f)) { onButtonClick("3") }
-                        LandscapeButton("%", modifier = Modifier.weight(1f)) { onButtonClick("%") }
-                        LandscapeButton("+", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("+") }
-                    }
-                    // Fila 4
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        LandscapeButton("0", modifier = Modifier.weight(1f)) { onButtonClick("0") }
-                        LandscapeButton(".", modifier = Modifier.weight(1f)) { onButtonClick(".") }
-                        LandscapeButton("⌫", modifier = Modifier.weight(1f)) { onButtonClick("⌫") }
-                        LandscapeButton("÷", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("÷") }
-                        LandscapeButton("=", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("=") }
+                        // Fila 1
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            LandscapeButton("7", modifier = Modifier.weight(1f)) { onButtonClick("7") }
+                            LandscapeButton("8", modifier = Modifier.weight(1f)) { onButtonClick("8") }
+                            LandscapeButton("9", modifier = Modifier.weight(1f)) { onButtonClick("9") }
+                            LandscapeButton("AC", modifier = Modifier.weight(1f)) { onButtonClick("AC") }
+                            LandscapeButton("×", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("×") }
+                        }
+                        // Fila 2
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            LandscapeButton("4", modifier = Modifier.weight(1f)) { onButtonClick("4") }
+                            LandscapeButton("5", modifier = Modifier.weight(1f)) { onButtonClick("5") }
+                            LandscapeButton("6", modifier = Modifier.weight(1f)) { onButtonClick("6") }
+                            LandscapeButton("+/-", modifier = Modifier.weight(1f)) { onButtonClick("+/-") }
+                            LandscapeButton("-", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("-") }
+                        }
+                        // Fila 3
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            LandscapeButton("1", modifier = Modifier.weight(1f)) { onButtonClick("1") }
+                            LandscapeButton("2", modifier = Modifier.weight(1f)) { onButtonClick("2") }
+                            LandscapeButton("3", modifier = Modifier.weight(1f)) { onButtonClick("3") }
+                            LandscapeButton("%", modifier = Modifier.weight(1f)) { onButtonClick("%") }
+                            LandscapeButton("+", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("+") }
+                        }
+                        // Fila 4
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            LandscapeButton("0", modifier = Modifier.weight(1f)) { onButtonClick("0") }
+                            LandscapeButton(".", modifier = Modifier.weight(1f)) { onButtonClick(".") }
+                            LandscapeButton("⌫", modifier = Modifier.weight(1f)) { onButtonClick("⌫") }
+                            LandscapeButton("÷", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("÷") }
+                            LandscapeButton("=", isOperator = true, modifier = Modifier.weight(1f)) { onButtonClick("=") }
+                        }
                     }
                 }
             } else {
+
                 // Layout vertical
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                        .windowInsetsPadding(WindowInsets.navigationBars),
-                    verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Bottom),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Text(
-                        text = expression,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        maxLines = 1,
-                        fontSize = when {
-                            expression.length > 12 -> 32.sp
-                            expression.length > 9 -> 42.sp
-                            expression.length > 6 -> 52.sp
-                            else -> 64.sp
-                        },
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 4.dp),
-                        textAlign = TextAlign.End,
-                        softWrap = false
-                    )
-                    Text(
-                        text = result,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                        maxLines = 1,
-                        fontSize = 36.sp,
+                            .weight(1f)
+                            .padding(horizontal = 16.dp)
+                            .windowInsetsPadding(WindowInsets.statusBars),
+                        verticalArrangement = Arrangement.Bottom,
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            text = expression,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            maxLines = 1,
+                            fontSize = when {
+                                expression.length > 12 -> 32.sp
+                                expression.length > 9 -> 42.sp
+                                expression.length > 6 -> 52.sp
+                                else -> 64.sp
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 4.dp),
+                            textAlign = TextAlign.End,
+                            softWrap = false
+                        )
+                        Text(
+                            text = result,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                            maxLines = 1,
+                            fontSize = 36.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            textAlign = TextAlign.End,
+                            softWrap = false
+                        )
+                    }
+
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        textAlign = TextAlign.End,
-                        softWrap = false
-                    )
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                        CalculatorButton("AC") { onButtonClick("AC") }
-                        CalculatorButton("+/-") { onButtonClick("+/-") }
-                        CalculatorButton("%") { onButtonClick("%") }
-                        CalculatorButton("÷", isOperator = true) { onButtonClick("÷") }
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                        CalculatorButton("7") { onButtonClick("7") }
-                        CalculatorButton("8") { onButtonClick("8") }
-                        CalculatorButton("9") { onButtonClick("9") }
-                        CalculatorButton("×", isOperator = true) { onButtonClick("×") }
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                        CalculatorButton("4") { onButtonClick("4") }
-                        CalculatorButton("5") { onButtonClick("5") }
-                        CalculatorButton("6") { onButtonClick("6") }
-                        CalculatorButton("-", isOperator = true) { onButtonClick("-") }
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                        CalculatorButton("1") { onButtonClick("1") }
-                        CalculatorButton("2") { onButtonClick("2") }
-                        CalculatorButton("3") { onButtonClick("3") }
-                        CalculatorButton("+", isOperator = true) { onButtonClick("+") }
-                    }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
-                        CalculatorButton("0") { onButtonClick("0") }
-                        CalculatorButton(".") { onButtonClick(".") }
-                        CalculatorButton("⌫") { onButtonClick("⌫") }
-                        CalculatorButton("=", isOperator = true) { onButtonClick("=") }
+                            .background(
+                                color = keyboardBg,
+                                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                            )
+                            .windowInsetsPadding(WindowInsets.navigationBars)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Bottom),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
+                            CalculatorButton("AC") { onButtonClick("AC") }
+                            CalculatorButton("+/-") { onButtonClick("+/-") }
+                            CalculatorButton("%") { onButtonClick("%") }
+                            CalculatorButton("÷", isOperator = true) { onButtonClick("÷") }
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
+                            CalculatorButton("7") { onButtonClick("7") }
+                            CalculatorButton("8") { onButtonClick("8") }
+                            CalculatorButton("9") { onButtonClick("9") }
+                            CalculatorButton("×", isOperator = true) { onButtonClick("×") }
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
+                            CalculatorButton("4") { onButtonClick("4") }
+                            CalculatorButton("5") { onButtonClick("5") }
+                            CalculatorButton("6") { onButtonClick("6") }
+                            CalculatorButton("-", isOperator = true) { onButtonClick("-") }
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
+                            CalculatorButton("1") { onButtonClick("1") }
+                            CalculatorButton("2") { onButtonClick("2") }
+                            CalculatorButton("3") { onButtonClick("3") }
+                            CalculatorButton("+", isOperator = true) { onButtonClick("+") }
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
+                            CalculatorButton("0") { onButtonClick("0") }
+                            CalculatorButton(".") { onButtonClick(".") }
+                            CalculatorButton("⌫") { onButtonClick("⌫") }
+                            CalculatorButton("=", isOperator = true) { onButtonClick("=") }
+                        }
                     }
                 }
             }
