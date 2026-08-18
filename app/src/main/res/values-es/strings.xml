@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Kvanto</string>
+    <string name="light_theme">Tema claro</string>
+    <string name="dark_theme">Tema oscuro</string>
+    <string name="history_title">Historial</string>
+    <string name="clear_history">Borrar historial</string>
+    <string name="no_history">No hay operaciones todavía</string>
+    <string name="settings_title">Ajustes</string>
+    <string name="vibration_label">Vibración al pulsar</string>
+    <string name="vibration_desc">Haptic Feedback</string>
+    <string name="about_title">Acerca de</string>
+    <string name="about_app_name">Kvanto: </string>
+    <string name="about_desc">Calculadora Android con Kotlin y Material 3 Compose</string>
+    <string name="github_cd">GitHub</string>
+    <string name="twitter_cd">Twitter</string>
+    <string name="options_cd">Opciones</string>
+    <string name="history_cd">Historial</string>
+    <string name="error_text">Error</string>
+</resources>

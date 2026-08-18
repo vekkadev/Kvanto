@@ -20,15 +20,21 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.LightMode
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,10 +46,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -99,12 +111,26 @@ fun CalculatorScreen(
     )
     var history by rememberSaveable(stateSaver = historySaver) { mutableStateOf(listOf()) }
     var showHistory by rememberSaveable { mutableStateOf(false) }
+    var showOptions by rememberSaveable { mutableStateOf(false) }
+    var isHapticEnabled by rememberSaveable { mutableStateOf(false) }
+    
+    val errorText = stringResource(R.string.error_text)
+    
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val keyboardBg = if (isDarkTheme) Color(0xFF3E4044) else Color(0xFFDFE1E5)
     val buttonColor = if (isDarkTheme) Color(0xFF2D2E32) else Color(0xFFF1F3F4)
     val toggleActiveColor = if (isDarkTheme) Color(0xFF4A4D51) else Color(0xFFE0E0E0)
     val operatorColor = if (isDarkTheme) CalcRed else CalcGreen
+    
+    val haptic = LocalHapticFeedback.current
+    val uriHandler = LocalUriHandler.current
+
+    fun triggerHaptic() {
+        if (isHapticEnabled) {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        }
+    }
 
     val annotatedExpression = remember(expression, isDarkTheme) {
         buildAnnotatedString {
@@ -145,6 +171,7 @@ fun CalculatorScreen(
     }
 
     fun onButtonClick(label: String) {
+        triggerHaptic()
         when (label) {
             "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" -> {
                 if (expression.isEmpty() || justCalculated) {
@@ -183,6 +210,35 @@ fun CalculatorScreen(
                 expression += label
                 updateResult()
             }
+            "+/-" -> {
+                if (expression.isEmpty()) return
+                val tokens = expression.split("+", "-", "×", "÷")
+                if (tokens.isEmpty()) return
+                val lastToken = tokens.last()
+                if (lastToken.isEmpty()) return
+                
+                val newLastToken = if (lastToken.startsWith("(-")) {
+                    lastToken.substring(2, lastToken.length - 1)
+                } else {
+                    "(-$lastToken)"
+                }
+                expression = expression.substring(0, expression.length - lastToken.length) + newLastToken
+                updateResult()
+            }
+            "%" -> {
+                if (expression.isEmpty()) return
+                val tokens = expression.split("+", "-", "×", "÷")
+                if (tokens.isEmpty()) return
+                val lastToken = tokens.last()
+                if (lastToken.isEmpty()) return
+                
+                try {
+                    val value = lastToken.toDouble() / 100.0
+                    val newValue = if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()
+                    expression = expression.substring(0, expression.length - lastToken.length) + newValue
+                    updateResult()
+                } catch (e: Exception) {}
+            }
             "=" -> {
                 if (expression.isEmpty()) return
                 try {
@@ -197,7 +253,7 @@ fun CalculatorScreen(
                     result = ""
                     justCalculated = true
                 } catch (e: Exception) {
-                    expression = "Error"
+                    expression = errorText
                     justCalculated = true
                 }
             }
@@ -209,63 +265,65 @@ fun CalculatorScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Toggle de tema
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(16.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(50.dp)
-                )
-                .padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
+        // Toggle de tema centrado
+        if (!showHistory && !showOptions) {
+            Row(
                 modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .padding(16.dp)
                     .background(
-                        color = if (!isDarkTheme) toggleActiveColor
-                        else Color.Transparent,
+                        color = MaterialTheme.colorScheme.surface,
                         shape = RoundedCornerShape(50.dp)
                     )
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { if (isDarkTheme) onToggleTheme() },
-                contentAlignment = Alignment.Center
+                    .padding(4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.LightMode,
-                    contentDescription = "Tema claro",
-                    tint = if (!isDarkTheme) CalcGreen else MaterialTheme.colorScheme.onSurface
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = if (isDarkTheme) toggleActiveColor
-                        else Color.Transparent,
-                        shape = RoundedCornerShape(50.dp)
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = if (!isDarkTheme) toggleActiveColor
+                            else Color.Transparent,
+                            shape = RoundedCornerShape(50.dp)
+                        )
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { if (isDarkTheme) onToggleTheme() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.LightMode,
+                        contentDescription = stringResource(R.string.light_theme),
+                        tint = if (!isDarkTheme) CalcGreen else MaterialTheme.colorScheme.onSurface
                     )
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { if (!isDarkTheme) onToggleTheme() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.DarkMode,
-                    contentDescription = "Tema oscuro",
-                    tint = if (isDarkTheme) CalcRed else MaterialTheme.colorScheme.onSurface
-                )
+                }
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = if (isDarkTheme) toggleActiveColor
+                            else Color.Transparent,
+                            shape = RoundedCornerShape(50.dp)
+                        )
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { if (!isDarkTheme) onToggleTheme() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.DarkMode,
+                        contentDescription = stringResource(R.string.dark_theme),
+                        tint = if (isDarkTheme) CalcRed else MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
 
         // Calculadora principal
-        if (!showHistory) {
+        if (!showHistory && !showOptions) {
             if (isLandscape) {
                 Column(
                     modifier = Modifier
@@ -310,7 +368,6 @@ fun CalculatorScreen(
                             .padding(8.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        // Fila 1
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -321,7 +378,6 @@ fun CalculatorScreen(
                             LandscapeButton("AC", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("AC") }
                             LandscapeButton("×", isOperator = true, modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("×") }
                         }
-                        // Fila 2
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -332,7 +388,6 @@ fun CalculatorScreen(
                             LandscapeButton("+/-", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("+/-") }
                             LandscapeButton("-", isOperator = true, modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("-") }
                         }
-                        // Fila 3
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -343,7 +398,6 @@ fun CalculatorScreen(
                             LandscapeButton("%", modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("%") }
                             LandscapeButton("+", isOperator = true, modifier = Modifier.weight(1f), containerColor = buttonColor) { onButtonClick("+") }
                         }
-                        // Fila 4
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -357,8 +411,6 @@ fun CalculatorScreen(
                     }
                 }
             } else {
-
-                // Layout vertical
                 Column(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -457,15 +509,30 @@ fun CalculatorScreen(
                     .padding(top = 72.dp)
                     .padding(horizontal = if (isLandscape) 120.dp else 16.dp)
             ) {
-                Text(
-                    text = "Historial",
-                    fontSize = 24.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.history_title),
+                        fontSize = 24.sp,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    if (history.isNotEmpty()) {
+                        IconButton(onClick = { history = emptyList() }) {
+                            Icon(
+                                imageVector = Icons.Rounded.Delete,
+                                contentDescription = stringResource(R.string.clear_history),
+                                tint = CalcRed
+                            )
+                        }
+                    }
+                }
+                
                 if (history.isEmpty()) {
                     Text(
-                        text = "No hay operaciones todavía",
+                        text = stringResource(R.string.no_history),
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                         fontSize = 16.sp
                     )
@@ -475,6 +542,11 @@ fun CalculatorScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
+                                .clickable {
+                                    expression = item.result
+                                    showHistory = false
+                                    updateResult()
+                                }
                         ) {
                             Text(
                                 text = item.expression,
@@ -496,9 +568,141 @@ fun CalculatorScreen(
             }
         }
 
+        // Panel de opciones
+        if (showOptions) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .padding(top = 72.dp)
+                    .padding(horizontal = if (isLandscape) 120.dp else 24.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.settings_title),
+                        fontSize = 24.sp,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+
+                // Vibración Toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.vibration_label),
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = stringResource(R.string.vibration_desc),
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                        )
+                    }
+                    Switch(
+                        checked = isHapticEnabled,
+                        onCheckedChange = { isHapticEnabled = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onBackground,
+                            checkedTrackColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
+                            uncheckedThumbColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
+                            uncheckedTrackColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f),
+                            uncheckedBorderColor = Color.Transparent
+                        )
+                    )
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 32.dp),
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                )
+
+                // Sección About
+                Text(
+                    text = stringResource(R.string.about_title),
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append(stringResource(R.string.about_app_name))
+                        }
+                        append(stringResource(R.string.about_desc))
+                    },
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    IconButton(
+                        onClick = { uriHandler.openUri("https://github.com/vekkadev") },
+                        modifier = Modifier.background(
+                            color = toggleActiveColor,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_github),
+                            contentDescription = stringResource(R.string.github_cd),
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    IconButton(
+                        onClick = { uriHandler.openUri("https://x.com/vekka_dev") },
+                        modifier = Modifier.background(
+                            color = toggleActiveColor,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_twitter),
+                            contentDescription = stringResource(R.string.twitter_cd),
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
+        }
+
+        // Botones de control al FINAL para asegurar Z-index superior (Siempre visibles)
+        // Boton de opciones (tres puntos / flecha) arriba a la izquierda
+        IconButton(
+            onClick = { 
+                if (showHistory) showHistory = false
+                showOptions = !showOptions 
+            },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = if (showOptions) Icons.AutoMirrored.Rounded.ArrowBack else Icons.Rounded.MoreVert,
+                contentDescription = stringResource(R.string.options_cd),
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+        }
+
         // Boton de historial arriba a la derecha
         IconButton(
-            onClick = { showHistory = !showHistory },
+            onClick = { 
+                if (showOptions) showOptions = false
+                showHistory = !showHistory 
+            },
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .windowInsetsPadding(WindowInsets.statusBars)
@@ -506,7 +710,7 @@ fun CalculatorScreen(
         ) {
             Icon(
                 imageVector = if (showHistory) Icons.Rounded.Close else Icons.Rounded.History,
-                contentDescription = "Historial",
+                contentDescription = stringResource(R.string.history_cd),
                 tint = MaterialTheme.colorScheme.onBackground
             )
         }
