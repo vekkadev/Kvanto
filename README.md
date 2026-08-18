@@ -1,4 +1,7 @@
-# <img src="screenshots/logo.png" height="40"> Kvanto
+<div align="center">
+  <img src="screenshots/logo.png" height="80">
+  <h1>Kvanto</h1>
+</div>
 
 **Kvanto** is a modern Android calculator built entirely with **Kotlin** and **Jetpack Compose**. Focused on simplicity and **Material 3** design, it offers a smooth and adaptive user experience.
 
