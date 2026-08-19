@@ -9,7 +9,7 @@
 
 This is a personal project focused on turning a basic utility into a modern, engaging experience. Every detail was crafted to provide a smooth and aesthetically satisfying user experience.
 
-## 📱 Screenshots
+## Screenshots:
 
 ### Portrait Mode
 | Light Mode | Dark Mode |
@@ -33,7 +33,7 @@ This is a personal project focused on turning a basic utility into a modern, eng
 - **History**: Quick access to previous operations.
 - **Custom Settings**: Panel to manage vibration and view project information.
 
-## 🛠️ Tech Stack
+## Tech Stack:
 
 - **Language**: Kotlin
 - **UI Framework**: Jetpack Compose
@@ -41,13 +41,13 @@ This is a personal project focused on turning a basic utility into a modern, eng
 - **Local Database/Preferences**: DataStore
 - **Dependency Management**: Version Catalogs (libs.versions.toml)
 
-## 📂 Project Structure
+## Project Structure:
 
 - `app/src/main/java/.../kvanto`: Contains UI logic and components.
 - `app/src/main/res`: System resources (icons, translations, themes).
 - `app/src/main/java/.../kvanto/ThemePreferences.kt`: User preferences management.
 
-## 🚀 Installation
+## Installation:
 
 1. Clone this repository.
 2. Open the project in **Android Studio (Ladybug or higher)**.
