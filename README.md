@@ -23,7 +23,7 @@ This is a personal project focused on turning a basic utility into a modern, eng
 
 ---
 
-## Key Features
+## Key Features:
 
 - **Material 3 Design**: Clean interface with dynamic shadows and modern components.
 - **Adaptive Theme**: Full support for Light and Dark modes, with automatic persistence.
