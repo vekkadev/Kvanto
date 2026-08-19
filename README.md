@@ -53,7 +53,3 @@ This is a personal project focused on turning a basic utility into a modern, eng
 2. Open the project in **Android Studio (Ladybug or higher)**.
 3. Sync the project with Gradle files.
 4. Run the application on an emulator or physical device.
-
----
-
-Developed by [vekka_dev](https://x.com/vekka_dev).
