@@ -265,7 +265,6 @@ fun CalculatorScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Toggle de tema centrado
         if (!showHistory && !showOptions) {
             Row(
                 modifier = Modifier
@@ -322,7 +321,6 @@ fun CalculatorScreen(
             }
         }
 
-        // Calculadora principal
         if (!showHistory && !showOptions) {
             if (isLandscape) {
                 Column(
@@ -499,7 +497,6 @@ fun CalculatorScreen(
             }
         }
 
-        // Panel de historial
         if (showHistory) {
             Column(
                 modifier = Modifier
@@ -568,7 +565,6 @@ fun CalculatorScreen(
             }
         }
 
-        // Panel de opciones
         if (showOptions) {
             Column(
                 modifier = Modifier
@@ -589,7 +585,6 @@ fun CalculatorScreen(
                     )
                 }
 
-                // Vibración Toggle
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -625,7 +620,6 @@ fun CalculatorScreen(
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
                 )
 
-                // Sección About
                 Text(
                     text = stringResource(R.string.about_title),
                     fontSize = 20.sp,
@@ -678,8 +672,6 @@ fun CalculatorScreen(
             }
         }
 
-        // Botones de control al FINAL para asegurar Z-index superior (Siempre visibles)
-        // Boton de opciones (tres puntos / flecha) arriba a la izquierda
         IconButton(
             onClick = { 
                 if (showHistory) showHistory = false
@@ -697,7 +689,6 @@ fun CalculatorScreen(
             )
         }
 
-        // Boton de historial arriba a la derecha
         IconButton(
             onClick = { 
                 if (showOptions) showOptions = false
