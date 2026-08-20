@@ -1,7 +1,8 @@
 <div align="center">
   <img src="screenshots/logo.png" height="80">
-  <h1>Kvanto</h1>
 </div>
+
+# Kvanto
 
 **Kvanto** is a modern Android calculator built entirely with **Kotlin** and **Jetpack Compose**. Focused on simplicity and **Material 3** design, it offers a smooth and adaptive user experience.
 
@@ -47,9 +48,11 @@ This is a personal project focused on turning a basic utility into a modern, eng
 - `app/src/main/res`: System resources (icons, translations, themes).
 - `app/src/main/java/.../kvanto/ThemePreferences.kt`: User preferences management.
 
-## Installation:
+## Requirements:
 
-1. Clone this repository.
-2. Open the project in **Android Studio (Ladybug or higher)**.
-3. Sync the project with Gradle files.
-4. Run the application on an emulator or physical device.
+- **Minimum Android Version**: Android 8.0 (Oreo) or higher (API 26).
+- **Optimized for**: Android 14 and 15 (Target API 37).
+
+---
+
+Developed by [vekka_dev](https://x.com/vekka_dev).
